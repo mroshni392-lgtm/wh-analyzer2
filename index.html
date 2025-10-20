@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome – WH HeatMap</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --accent: linear-gradient(90deg, #7dd3fc, #60a5fa);
+      --text: #e6eef6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
+    body {
+      background: radial-gradient(800px 500px at 10% 10%, rgba(59,130,246,0.15), transparent), var(--bg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--text);
+      overflow: hidden;
+    }
+    .logo {
+      background: var(--accent);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: #04263b;
+      box-shadow: 0 0 40px rgba(96,165,250,0.6);
+      animation: pulse 2s infinite ease-in-out;
+    }
+    .logo span {
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(96,165,250,0.6); }
+      50% { transform: scale(1.08); box-shadow: 0 0 70px rgba(96,165,250,0.9); }
+    }
+    h1 {
+      margin-top: 25px;
+      font-size: 26px;
+      text-align: center;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadein 1.2s ease;
+    }
+    p {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #9aa4b2;
+      text-align: center;
+      animation: fadein 1.6s ease;
+    }
+    .btn {
+      margin-top: 35px;
+      background: var(--accent);
+      color: #04263b;
+      font-weight: 600;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(96,165,250,0.4);
+      transition: 0.3s;
+      animation: fadein 2s ease;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 22px rgba(96,165,250,0.6);
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    WH 🔥
+    <span>HeatMap</span>
+  </div>
+  <h1>Welcome to Waste Heat Map Analyzer</h1>
+  <p>Turn your daily tasks into smart productivity insights 🚀</p>
+  <button class="btn" onclick="window.location.href='login.html'">Continue</button>
+</body>
+</html>

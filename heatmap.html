@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Waste Heat Map – Smart Productivity Analyzer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg:#0f1724;
+      --card:#111b2e;
+      --glass:rgba(255,255,255,0.05);
+      --accent:linear-gradient(90deg,#7dd3fc,#60a5fa);
+      --muted:#9aa4b2;
+    }
+    *{box-sizing:border-box}
+    body {
+      margin:0;
+      font-family:"Inter",sans-serif;
+      background:radial-gradient(1000px 600px at 10% 10%,rgba(59,130,246,0.1),transparent),var(--bg);
+      color:#e6eef6;
+      min-height:100vh;
+    }
+    .app{max-width:1100px;margin:auto;padding:20px}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+    .logo{background:var(--accent);width:60px;height:60px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#04263b;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+    h1{margin:0;font-size:22px}
+    p.lead{margin:0;color:var(--muted);font-size:14px}
+    .grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+    label{font-size:13px;color:var(--muted)}
+    input,select{width:100%;padding:10px;margin-top:5px;margin-bottom:12px;border-radius:8px;border:none;background:var(--glass);color:#fff;font-size:14px}
+    .btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600}
+    .btn-primary{background:var(--accent);color:#04263b}
+    .btn-secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.1)}
+    .tile{background:var(--glass);padding:16px;border-radius:12px;margin-bottom:16px}
+    .tile h3{margin:0 0 6px 0;font-size:16px}
+    .chart-container{width:100%;max-width:260px;margin:auto}
+    .note{margin-top:10px;font-size:14px;text-align:center;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px}
+    .actions{display:flex;gap:8px;justify-content:center;margin-top:10px}
+    .actions button{font-size:13px}
+    #welcomeUser {
+      text-align:center;
+      color:#7dd3fc;
+      margin-bottom:20px;
+      font-size:18px;
+      opacity:1;
+      transition:opacity 2s ease;
+    }
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">WH</div>
+      <div>
+        <h1>Waste Heat Map Analyzer</h1>
+        <p class="lead">See how productive each software task is — instantly visualized 🔥</p>
+      </div>
+    </header>
+
+    <!-- 👋 Personalized welcome message -->
+    <h2 id="welcomeUser"></h2>
+
+    <div class="grid">
+      <!-- Input form -->
+      <div>
+        <div class="card">
+          <h2 style="margin-top:0">Add New Task</h2>
+          <label>Task Name</label>
+          <input id="taskName" type="text" placeholder="e.g. API Integration" />
+
+          <label>Hours Spent</label>
+          <input id="hours" type="number" min="0" step="0.5" value="2" />
+
+          <label>Rework Count</label>
+          <input id="rework" type="number" min="0" value="0" />
+
+          <label>Blocked?</label>
+          <select id="blocked">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+
+          <label>Category</label>
+          <select id="category">
+            <option value="development">Development</option>
+            <option value="review">Review</option>
+            <option value="meeting">Meeting</option>
+            <option value="testing">Testing</option>
+          </select>
+
+          <button class="btn btn-primary" id="addBtn">Add Task</button>
+          <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script>
+    // 👋 Show personalized welcome message
+    const user = localStorage.getItem('user');
+    if (user) {
+      const welcome = document.getElementById('welcomeUser');
+      welcome.textContent = `👋 Welcome, ${user}! Let’s make your day productive 🚀`;
+
+      // Fade out after 5 seconds
+      setTimeout(() => {
+        welcome.style.opacity = 0;
+      }, 5000);
+    }
+
+    let tasks = [];
+    const output = document.getElementById("output");
+
+    function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+    function uid(){return Math.random().toString(36).slice(2,9);}
+
+    function computeWaste(task){
+      const hoursFactor = clamp(task.hours / 8,0,1)*0.2;
+      const reworkFactor = clamp(task.rework,0,4)*0.22;
+      const blockedFactor = task.blocked ? 0.45 : 0;
+      return clamp(hoursFactor + reworkFactor + blockedFactor, 0, 1);
+    }
+
+    function productivityTips(prod){
+      if(prod >= 0.8) return "💚 Excellent! Keep up the efficient workflow 🚀";
+      if(prod >= 0.4) return "⚖️ Balanced effort — reduce rework or long hours 🌱";
+      return "⚠️ Needs attention — unblock issues and reduce rework 🔧";
+    }
+
+    function addTask(){
+      const t = {
+        id:uid(),
+        name:document.getElementById("taskName").value.trim() || "Untitled Task",
+        hours:parseFloat(document.getElementById("hours").value)||0,
+        rework:parseInt(document.getElementById("rework").value)||0,
+        blocked:!!Number(document.getElementById("blocked").value),
+        category:document.getElementById("category").value
+      };
+      tasks.push(t);
+      render();
+      document.getElementById("taskName").value="";
+    }
+
+    function removeTask(id){
+      tasks = tasks.filter(t=>t.id!==id);
+      render();
+    }
+
+    function clearAll(){
+      if(confirm("Delete all tasks?")){tasks=[];render();}
+    }
+
+    function render(){
+      output.innerHTML="";
+      tasks.forEach(t=>{
+        const waste = computeWaste(t);
+        const productive = 1 - waste;
+        const neutral = clamp(1 - productive - waste, 0, 1);
+
+        const tile = document.createElement("div");
+        tile.className="card tile";
+        tile.innerHTML=`
+          <h3>${t.name}</h3>
+          <p style="font-size:13px;color:#9aa4b2">${t.category} • ${t.hours}h • rework ${t.rework} ${t.blocked?"• blocked":""}</p>
+          <div class="chart-container">
+            <canvas id="chart-${t.id}"></canvas>
+          </div>
+          <div class="note">${productivityTips(productive)}</div>
+          <div class="actions">
+            <button class="btn btn-secondary" onclick="removeTask('${t.id}')">🗑 Remove</button>
+          </div>
+        `;
+        output.appendChild(tile);
+
+        const ctx = document.getElementById(`chart-${t.id}`);
+        new Chart(ctx,{
+          type:'pie',
+          data:{
+            labels:['Productive','Neutral','Waste'],
+            datasets:[{
+              data:[(productive*100).toFixed(1),(neutral*100).toFixed(1),(waste*100).toFixed(1)],
+              backgroundColor:['#16a34a','#facc15','#ef4444']
+            }]
+          },
+          options:{
+            plugins:{
+              legend:{display:true,labels:{color:'#e6eef6'}},
+              tooltip:{callbacks:{
+                label:(c)=>`${c.label}: ${c.parsed}%`
+              }}
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById("addBtn").addEventListener("click",addTask);
+    document.getElementById("clearBtn").addEventListener("click",clearAll);
+  </script>
+</body>
+</html>

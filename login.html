@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – WH HeatMap</title>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    :root {
+      --bg:#0f1724;
+      --card:#111b2e;
+      --accent:linear-gradient(90deg,#7dd3fc,#60a5fa);
+      --muted:#94a3b8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:"Inter",sans-serif}
+    body {
+      background:radial-gradient(800px 600px at 10% 10%,rgba(59,130,246,0.15),transparent),var(--bg);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      color:#e6eef6;
+    }
+    .card {
+      background:var(--card);
+      border-radius:18px;
+      padding:30px;
+      width:100%;
+      max-width:400px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.45);
+      text-align:center;
+      animation:fadein 1s ease;
+    }
+    @keyframes fadein {from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+    .logo {
+      background:var(--accent);
+      width:100px;height:100px;
+      margin:0 auto 15px;
+      border-radius:50%;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      color:#04263b;font-size:28px;font-weight:800;
+      box-shadow:0 0 35px rgba(96,165,250,0.6);
+      animation:pulse 2s infinite ease-in-out;
+    }
+    .logo span {font-size:14px;letter-spacing:1px;}
+    @keyframes pulse {0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+    h2 {margin-bottom:10px;font-size:22px;}
+    p {color:var(--muted);font-size:13px;margin-bottom:18px;}
+    input, select {
+      width:100%;padding:10px;border:none;border-radius:8px;
+      margin-bottom:12px;background:rgba(255,255,255,0.05);
+      color:#fff;font-size:14px;
+    }
+    .btn {
+      width:100%;padding:12px;border:none;border-radius:10px;
+      cursor:pointer;background:var(--accent);
+      color:#04263b;font-weight:600;font-size:15px;
+      transition:0.3s;box-shadow:0 4px 14px rgba(96,165,250,0.4);
+    }
+    .btn:hover {transform:scale(1.03);box-shadow:0 6px 20px rgba(96,165,250,0.5);}
+    .switch {margin-top:12px;font-size:13px;color:var(--muted);}
+    .switch span {color:#60a5fa;cursor:pointer;font-weight:600;}
+    .forgot {color:#60a5fa;font-size:13px;text-decoration:underline;cursor:pointer;display:block;margin-top:8px;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">WH 🔥<span>HeatMap</span></div>
+    <h2 id="formTitle">Create Account</h2>
+    <p id="formSubtitle">Start analyzing your productivity in style 💡</p>
+
+    <!-- Register Form -->
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <select id="purpose">
+        <option value="">Select Purpose</option>
+        <option>Project Tracking</option>
+        <option>Personal Productivity</option>
+        <option>Team Monitoring</option>
+      </select>
+      <button type="button" class="btn" onclick="register()">Create Account</button>
+    </form>
+
+    <!-- Login Form -->
+    <form id="loginForm" style="display:none;">
+      <input type="text" id="loginUser" placeholder="Username or Phone" required>
+      <input type="password" id="loginPass" placeholder="Password" required>
+      <button type="button" class="btn" onclick="login()">Login</button>
+      <span class="forgot" onclick="forgotPassword()">Forgot Password?</span>
+    </form>
+
+    <!-- Forgot Password Form -->
+    <form id="forgotForm" style="display:none;">
+      <input type="email" id="resetEmail" placeholder="Enter your registered email" required>
+      <button type="button" class="btn" onclick="sendResetLink()">Send Reset Link</button>
+    </form>
+
+    <div class="switch">
+      <span id="switchText" onclick="toggleForm()">Already have an account? Login</span>
+    </div>
+  </div>
+
+  <script>
+    // Initialize EmailJS
+    (function(){
+      emailjs.init("sgEnZ4-H-8ErbURDC"); // ✅ Replace with your actual EmailJS Public Key
+    })();
+
+    const regForm = document.getElementById("registerForm");
+    const logForm = document.getElementById("loginForm");
+    const forgotForm = document.getElementById("forgotForm");
+    const switchText = document.getElementById("switchText");
+    const title = document.getElementById("formTitle");
+    const subtitle = document.getElementById("formSubtitle");
+
+    function toggleForm() {
+      if (regForm.style.display === "none") {
+        regForm.style.display = "block";
+        logForm.style.display = "none";
+        forgotForm.style.display = "none";
+        title.textContent = "Create Account";
+        subtitle.textContent = "Start analyzing your productivity in style 💡";
+        switchText.textContent = "Already have an account? Login";
+      } else {
+        regForm.style.display = "none";
+        logForm.style.display = "block";
+        forgotForm.style.display = "none";
+        title.textContent = "Login to Your Account";
+        subtitle.textContent = "Welcome back! Continue your productivity journey 🚀";
+        switchText.textContent = "New here? Create Account";
+      }
+    }
+
+    function register() {
+      const user = document.getElementById("username").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const pass = document.getElementById("password").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      if (!user || !phone || !pass || !email) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      localStorage.setItem("username", user);
+      localStorage.setItem("phone", phone);
+      localStorage.setItem("email", email);
+      localStorage.setItem("password", pass);
+
+      alert("🎉 Account created successfully!");
+      window.location.href = "heatmap.html";
+    }
+
+    function login() {
+      const loginUser = document.getElementById("loginUser").value.trim();
+      const loginPass = document.getElementById("loginPass").value.trim();
+
+      const storedUser = localStorage.getItem("username");
+      const storedPhone = localStorage.getItem("phone");
+      const storedPass = localStorage.getItem("password");
+
+      if ((loginUser === storedUser || loginUser === storedPhone) && loginPass === storedPass) {
+        alert("✅ Login successful!");
+        window.location.href = "heatmap.html";
+      } else {
+        alert("❌ Invalid username/phone or password!");
+      }
+    }
+
+    function forgotPassword() {
+      regForm.style.display = "none";
+      logForm.style.display = "none";
+      forgotForm.style.display = "block";
+      title.textContent = "Reset Password";
+      subtitle.textContent = "Enter your registered email to get reset link 🔒";
+      switchText.textContent = "Back to Login";
+    }
+
+    function sendResetLink() {
+      const email = document.getElementById("resetEmail").value.trim();
+
+      if (!email) {
+        alert("❌ Please enter a valid email!");
+        return;
+      }
+
+      // ✅ Always send to whatever email is entered
+      const templateParams = {
+        to_email: email,
+        username: localStorage.getItem("username") || "User",
+        reset_link: `https://127.0.0.1:5500/reset.html?email=${encodeURIComponent(email)}`
+      };
+
+      emailjs.send("service_arahfuc", "template_gba82hk", templateParams)
+        .then(() => {
+          alert(`📧 Password reset link has been sent to ${email}`);
+          toggleForm();
+        })
+        .catch((error) => {
+          alert("❌ Error sending email: " + JSON.stringify(error));
+        });
+    }
+  </script>
+</body>
+</html>
